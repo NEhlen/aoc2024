@@ -2,7 +2,7 @@ import numpy as np
 
 
 # load list
-file = "01/test.txt"
+file = "01/input.txt"
 
 with open(file, "r") as f:
     lines = f.readlines()
@@ -26,3 +26,5 @@ similarity = 0
 for element in listA:
     n_element_in_B = (listB == element).sum()
     similarity += element * n_element_in_B
+
+print("Total similarity:", similarity)
