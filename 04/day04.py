@@ -10,10 +10,7 @@ data = np.array([[l for l in line.strip()] for line in lines])
 
 
 def count_occurences(
-    data: np.ndarray,
-    filter_: np.ndarray,
-    sum_axis: int | tuple[int],
-    find_equal: int = 4,
+    data: np.ndarray, filter_: np.ndarray, sum_axis: int | tuple[int]
 ) -> int:
     # create sliding window of array of size (1,4)
     v = np.lib.stride_tricks.sliding_window_view(data, filter_.shape)
@@ -22,7 +19,7 @@ def count_occurences(
         np.char.compare_chararrays(v, filter_, "==", True).sum(axis=sum_axis)
     )
     # find the ones where all are equal
-    num_xmas = (count == find_equal).sum()
+    num_xmas = (count == (filter_ != "O").sum()).sum()
     return num_xmas
 
 
@@ -117,9 +114,9 @@ mas_bb = np.array(
     ]
 )
 
-nmff = count_occurences(data, mas_ff, (2, 3), find_equal=5)
-nmfb = count_occurences(data, mas_fb, (2, 3), find_equal=5)
-nmbf = count_occurences(data, mas_bf, (2, 3), find_equal=5)
-nmbb = count_occurences(data, mas_bb, (2, 3), find_equal=5)
+nmff = count_occurences(data, mas_ff, (2, 3))
+nmfb = count_occurences(data, mas_fb, (2, 3))
+nmbf = count_occurences(data, mas_bf, (2, 3))
+nmbb = count_occurences(data, mas_bb, (2, 3))
 
 print("total mas:", nmff + nmfb + nmbf + nmbb)
