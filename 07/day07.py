@@ -10,10 +10,18 @@ for line in lines:
     data.append(new_point)
 
 operators_A = ("+", "*")
-operators_B = ("+", "*", "")
+operators_B = (
+    "+",
+    "*",
+    "",
+)  # because we're using string concatenations "" is the combination operator
 
 
+# recursively run through all possible operator-combinations
 def operate(num: str, rest: list[str], result: int, operators: list[str]):
+    # if there is only one element left in the list, get the final number
+    # and compare if result. If one of the operator options gives a
+    # correct result return True else False
     if len(rest) == 1:
         for operator in operators:
             new_num = eval(num + operator + rest[0])
@@ -21,6 +29,12 @@ def operate(num: str, rest: list[str], result: int, operators: list[str]):
                 return True
         else:
             return False
+    # else for every possible operator calculate the new number
+    # if the new number is bigger than the final result, break the recursion
+    # and return False
+    # else resurse into operate again with the new number and the rest of the
+    # list, if one of them is True return True
+    # else return False
     else:
         for operator in operators:
             new_num = eval(num + operator + rest[0])
