@@ -14,12 +14,16 @@ operators_B = ("+", "*", "")
 
 
 def operate(num: str, rest: list[str], result: int, operators: list[str]):
-    second_num = rest[0]
-    new_nums = [eval(num + operator + second_num) for operator in operators]
     if len(rest) == 1:
-        return any([new_num == result for new_num in new_nums])
+        for operator in operators:
+            new_num = eval(num + operator + rest[0])
+            if new_num == result:
+                return True
+        else:
+            return False
     else:
-        for new_num in new_nums:
+        for operator in operators:
+            new_num = eval(num + operator + rest[0])
             if new_num > result:
                 return False
             if operate(str(new_num), rest[1:], result, operators):
