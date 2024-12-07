@@ -19,9 +19,11 @@ def operate(num: str, rest: list[str], result: int, operators: list[str]):
     if len(rest) == 1:
         return any([new_num == result for new_num in new_nums])
     else:
-        return any(
-            [operate(str(new_num), rest[1:], result, operators) for new_num in new_nums]
-        )
+        for new_num in new_nums:
+            if operate(str(new_num), rest[1:], result, operators):
+                return True
+        else:
+            return False
 
 
 total_sum_A = 0
