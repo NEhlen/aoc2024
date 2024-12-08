@@ -72,8 +72,10 @@ for atype in antenna_types:
     # adiffs[i,j] holds the difference between vector in row
     # i and vector in row j in antennas
     adiffs = antennas[:, None, :] - antennas[None, :, :]
-    # get the nodes positions by adding the diffs to the original
-    # antenna positions
+    # get the nodes positions by adding n times the diffs to the
+    # original antenna positions
+    # repeat 50 times, in a 50x50 grid this means we ensure we've
+    # reached any potential note
     for n in range(50):
         nodes_3d = antennas[:, None, :] + n * adiffs
         # flatten the nodes down to a 2d array
