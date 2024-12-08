@@ -22,11 +22,14 @@ for atype in antenna_types:
     # adiffs[i,j] holds the difference between vector in row
     # i and vector in row j in antennas
     adiffs = antennas[:, None, :] - antennas[None, :, :]
+
     # get the nodes positions by adding the diffs to the original
     # antenna positions
     nodes_3d = antennas[:, None, :] + adiffs
+
     # flatten the nodes down to a 2d array
     nodes = nodes_3d.reshape(-1, nodes_3d.shape[-1])
+
     # mask the "on-diagonals" of nodes_3d because they are artifacts
     # of the vector optimization (we're adding and subtracting the
     # antenna position to itself so just end up with the original
@@ -72,6 +75,7 @@ for atype in antenna_types:
     # adiffs[i,j] holds the difference between vector in row
     # i and vector in row j in antennas
     adiffs = antennas[:, None, :] - antennas[None, :, :]
+
     # get the nodes positions by adding n times the diffs to the
     # original antenna positions
     # repeat 50 times, in a 50x50 grid this means we ensure we've
