@@ -4,7 +4,7 @@ with open(file, "r") as f:
     stones_start = f.read().strip().split()
 
 
-def recursive_rules(stone: str, i: int, N: int, cache: dict):
+def recursive_rules(stone: str, i: int, N: int, cache: dict) -> int:
     """
     recursion for rules
     stone is a str of an int
