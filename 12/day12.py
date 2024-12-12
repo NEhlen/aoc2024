@@ -35,8 +35,41 @@ def count_fences(arr: np.ndarray) -> np.ndarray:
     return fences
 
 
+def get_sides(g):
+    padded = np.zeros((g.shape[0] + 2, g.shape[1] + 2), dtype=int)
+    padded[1:-1, 1:-1] = g
+    g = padded
+    cvu = np.zeros(g.shape, dtype=int)  #  up edges
+    cvd = np.zeros(g.shape, dtype=int)  # down edges
+    chl = np.zeros(g.shape, dtype=int)  # left edges
+    chr = np.zeros(g.shape, dtype=int)  # right edges
+    dvu = np.zeros(g.shape, dtype=int)
+    dvd = np.zeros(g.shape, dtype=int)
+    dhl = np.zeros(g.shape, dtype=int)
+    dhr = np.zeros(g.shape, dtype=int)
+    t0 = convolve2d(g, np.array([[1], [-1]]), mode="valid")
+    t1 = convolve2d(g, np.array([[1, -1]]), mode="valid")
+    cvu[1:] += t0 == 1
+    cvd[:-1] += t0 == -1
+    chl[:, 1:] += t1 == 1
+    chr[:, :-1] += t1 == -1
+    dvu[:, 1:] += convolve2d(cvu, np.array([[1, -1]]), mode="valid")
+    dvd[:, 1:] += convolve2d(cvd, np.array([[1, -1]]), mode="valid")
+    dhl[1:] += convolve2d(chl, np.array([[1], [-1]]), mode="valid")
+    dhr[1:] += convolve2d(chr, np.array([[1], [-1]]), mode="valid")
+
+    mask = g == 1
+    return (
+        (dvd[mask] > 0).sum()
+        + (dvu[mask] > 0).sum()
+        + (dhl[mask] > 0).sum()
+        + (dhr[mask] > 0).sum()
+    )
+
+
 connected_regions = {}
-total_price = 0
+total_price_A = 0
+total_price_B = 0
 for val in range(1, garden.max() + 1):
     # only find features exactly matching val, need to make boolean mask
     mask = garden == val
@@ -50,6 +83,9 @@ for val in range(1, garden.max() + 1):
         area = region_mask.sum()
         fences = count_fences(region_mask)
         num_fences = fences[region_mask].sum()
-        total_price += area * num_fences
+        num_sides = get_sides(region_mask)
+        total_price_A += area * num_fences
+        total_price_B += area * num_sides
 
-print("Total Price A:", total_price)
+print("Total Price A:", total_price_A)
+print("Total Price B:", total_price_B)
