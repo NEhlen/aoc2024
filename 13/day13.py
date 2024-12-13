@@ -37,28 +37,36 @@ tokens_spent_A = 0
 tokens_spent_B = 0
 diff_list = []
 for block in blocks:
+    # solution (linear algebra):
+    # A.x = p || A⁻¹.
+    # A⁻¹.A.x = A⁻¹.p
+    # x = A⁻¹.p
+    # turn the direction vectors into a matrix
     A = np.vstack([block["a"], block["b"]], dtype=float).T
-
+    # invert the matrix
     Ainv = invert_2by2(A)
     moves_A = Ainv @ (block["prize"])
     moves_B = Ainv @ (block["prize"] + 10000000000000)
 
+    # these checks are necessary due to rounding errors with
+    # the floating points, it's just an is-integer check
+    # because the python in-built functions don't work here
     if (
-        abs(moves_A[0] - int(moves_A[0])) < 0.01
-        or abs(moves_A[0] - int(moves_A[0]) - 1) < 0.01
+        abs(moves_A[0] - int(moves_A[0])) < 0.001
+        or abs(moves_A[0] - int(moves_A[0]) - 1) < 0.001
     ) and (
-        abs(moves_A[1] - int(moves_A[1])) < 0.01
-        or abs(moves_A[1] - int(moves_A[1]) - 1) < 0.01
+        abs(moves_A[1] - int(moves_A[1])) < 0.001
+        or abs(moves_A[1] - int(moves_A[1]) - 1) < 0.001
     ):
         tokens_A = moves_A @ cost
         tokens_spent_A += tokens_A
 
     if (
-        abs(moves_B[0] - int(moves_B[0])) < 0.01
-        or abs(moves_B[0] - int(moves_B[0]) - 1) < 0.01
+        abs(moves_B[0] - int(moves_B[0])) < 0.001
+        or abs(moves_B[0] - int(moves_B[0]) - 1) < 0.001
     ) and (
-        abs(moves_B[1] - int(moves_B[1])) < 0.01
-        or abs(moves_B[1] - int(moves_B[1]) - 1) < 0.01
+        abs(moves_B[1] - int(moves_B[1])) < 0.001
+        or abs(moves_B[1] - int(moves_B[1]) - 1) < 0.001
     ):
         tokens_B = moves_B @ cost
         tokens_spent_B += tokens_B
