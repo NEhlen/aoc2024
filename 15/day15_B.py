@@ -1,6 +1,4 @@
 import numpy as np
-from copy import deepcopy
-import matplotlib.pyplot as plt
 
 np.set_printoptions(linewidth=800)
 
