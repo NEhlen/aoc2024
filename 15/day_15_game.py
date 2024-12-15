@@ -9,7 +9,7 @@ np.set_printoptions(linewidth=800)
 
 file = "15/input.txt"
 
-step_through = True
+play = True
 
 with open(file, "r") as f:
     plan, moves = f.read().strip().split("\n\n")
@@ -23,7 +23,7 @@ def score_boxes(boxes: set[complex]) -> int:
 moves = moves.replace("\n", "")
 dir_map = {"v": 0 + 1j, "<": -1 + 0j, ">": 1 + 0j, "^": 0 - 1j}
 dir_map_reverse = dict(zip(dir_map.values(), dir_map.keys()))
-moves = [dir_map[char_] for char_ in moves]
+# moves = [dir_map[char_] for char_ in moves]
 
 
 # modify map
@@ -102,12 +102,48 @@ scale_factor = 10
 window_height = (plan.shape[0] + 5) * scale_factor
 window_width = plan.shape[1] * scale_factor
 
-COL_ROBOT = "#21181b"
-COL_SCOREBOARD = "#cd5f2a"
-COL_WALL = "#cd5f2a"
-COL_BOX = "#f2ab37"
-COL_BG = "#faf5d8"
 
+def load_colormap(cmap: str = "default"):
+    if cmap == "default":
+        COL_ROBOT = "#555568"
+        COL_BOX = "#a0a08b"
+        COL_WALL = "#555568"
+        COL_WALL_HIGHLIGHT = COL_BOX
+        COL_BG = "#e9efec"
+        COL_SCORE = COL_ROBOT
+        COL_SCOREBOARD = "#211e20"
+
+    elif cmap == "hard":
+        COL_ROBOT = "#5fc75d"
+        COL_BOX = "#36868f"
+        COL_WALL = "#0f052d"
+        COL_WALL_HIGHLIGHT = COL_ROBOT
+        COL_BG = "#203671"
+        COL_SCORE = COL_ROBOT
+        COL_SCOREBOARD = "#203671"
+    elif cmap == "gb":
+        COL_ROBOT = "#405010"
+        COL_BOX = "#708028"
+        COL_WALL = "#405010"
+        COL_WALL_HIGHLIGHT = COL_BOX
+        COL_BG = "#d0d058"
+        COL_SCORE = COL_BG
+        COL_SCOREBOARD = "#405010"
+
+    return (
+        COL_ROBOT,
+        COL_BOX,
+        COL_WALL,
+        COL_WALL_HIGHLIGHT,
+        COL_BG,
+        COL_SCORE,
+        COL_SCOREBOARD,
+    )
+
+
+COL_ROBOT, COL_BOX, COL_WALL, COL_WALL_HIGHLIGHT, COL_BG, COL_SCORE, COL_SCOREBOARD = (
+    load_colormap("gb")
+)
 window = pygame.display.set_mode((window_width, window_height))
 window.fill(COL_BG)
 
@@ -117,25 +153,25 @@ pattern_size = 20
 pattern_surface = pygame.Surface((pattern_size, pattern_size))
 pattern_surface.fill(COL_WALL)  # Background color
 pygame.draw.line(
-    pattern_surface, COL_BOX, (0, 0), (pattern_size, pattern_size), 2
+    pattern_surface, COL_WALL_HIGHLIGHT, (0, 0), (pattern_size, pattern_size), 2
 )  # Diagonal line
 pygame.draw.line(
-    pattern_surface, COL_BOX, (0, 5), (pattern_size, pattern_size + 5), 2
+    pattern_surface, COL_WALL_HIGHLIGHT, (0, 5), (pattern_size, pattern_size + 5), 2
 )  # Diagonal line
 pygame.draw.line(
-    pattern_surface, COL_BOX, (0, 10), (pattern_size, pattern_size + 10), 2
+    pattern_surface, COL_WALL_HIGHLIGHT, (0, 10), (pattern_size, pattern_size + 10), 2
 )  # Diagonal line
 pygame.draw.line(
-    pattern_surface, COL_BOX, (0, 15), (pattern_size, pattern_size + 15), 2
+    pattern_surface, COL_WALL_HIGHLIGHT, (0, 15), (pattern_size, pattern_size + 15), 2
 )  # Diagonal line
 pygame.draw.line(
-    pattern_surface, COL_BOX, (5, 0), (pattern_size + 5, pattern_size), 2
+    pattern_surface, COL_WALL_HIGHLIGHT, (5, 0), (pattern_size + 5, pattern_size), 2
 )  # Diagonal line
 pygame.draw.line(
-    pattern_surface, COL_BOX, (10, 0), (pattern_size + 10, pattern_size), 2
+    pattern_surface, COL_WALL_HIGHLIGHT, (10, 0), (pattern_size + 10, pattern_size), 2
 )  # Diagonal line
 pygame.draw.line(
-    pattern_surface, COL_BOX, (15, 0), (pattern_size + 15, pattern_size), 2
+    pattern_surface, COL_WALL_HIGHLIGHT, (15, 0), (pattern_size + 15, pattern_size), 2
 )  # Diagonal line
 
 # Pre-generate a large tiled pattern surface
@@ -191,29 +227,51 @@ FPS = pygame.time.Clock()
 GAME_FONT = pygame.freetype.SysFont(pygame.freetype.get_default_font(), 26)
 FPS.tick(60)
 
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-            print("Quitting Game")
-            pygame.quit()
-            sys.exit()
+count = 0
+window.fill(COL_BG)
+pygame.draw.rect(
+    window,
+    COL_SCOREBOARD,
+    pygame.Rect((0, window_height - 5 * scale_factor, window_width, 5 * scale_factor)),
+)
+draw(
+    robot_pos,
+    walls,
+    boxes_l,
+)
+GAME_FONT.render_to(
+    window,
+    (40, window_height - 4 * scale_factor),
+    "GPS Score: " + str(score_boxes(boxes_l)),
+    COL_SCORE,
+)
 
-        if event.type == KEYDOWN and event.key == K_d:
-            robot_pos, boxes_l, boxes_r = move_character(
-                ">", robot_pos, boxes_l, boxes_r
-            )
-        if event.type == KEYDOWN and event.key == K_a:
-            robot_pos, boxes_l, boxes_r = move_character(
-                "<", robot_pos, boxes_l, boxes_r
-            )
-        if event.type == KEYDOWN and event.key == K_s:
-            robot_pos, boxes_l, boxes_r = move_character(
-                "v", robot_pos, boxes_l, boxes_r
-            )
-        if event.type == KEYDOWN and event.key == K_w:
-            robot_pos, boxes_l, boxes_r = move_character(
-                "^", robot_pos, boxes_l, boxes_r
-            )
+pygame.display.update()
+pygame.image.save(window, "15/screenshot.png")
+while True:
+    if play:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                print("Quitting Game")
+                pygame.quit()
+                sys.exit()
+
+            if event.type == KEYDOWN and event.key == K_d:
+                robot_pos, boxes_l, boxes_r = move_character(
+                    ">", robot_pos, boxes_l, boxes_r
+                )
+            if event.type == KEYDOWN and event.key == K_a:
+                robot_pos, boxes_l, boxes_r = move_character(
+                    "<", robot_pos, boxes_l, boxes_r
+                )
+            if event.type == KEYDOWN and event.key == K_s:
+                robot_pos, boxes_l, boxes_r = move_character(
+                    "v", robot_pos, boxes_l, boxes_r
+                )
+            if event.type == KEYDOWN and event.key == K_w:
+                robot_pos, boxes_l, boxes_r = move_character(
+                    "^", robot_pos, boxes_l, boxes_r
+                )
         window.fill(COL_BG)
         pygame.draw.rect(
             window,
@@ -230,8 +288,45 @@ while True:
         GAME_FONT.render_to(
             window,
             (40, window_height - 4 * scale_factor),
-            str(score_boxes(boxes_l)),
-            (255, 255, 0),
+            "GPS Score: " + str(score_boxes(boxes_l)),
+            COL_SCORE,
         )
 
         pygame.display.update()
+    else:
+        for event in pygame.event.get():
+            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                print("Quitting Game")
+                pygame.quit()
+                sys.exit()
+
+        robot_pos, boxes_l, boxes_r = move_character(
+            moves[count], robot_pos, boxes_l, boxes_r
+        )
+
+        window.fill(COL_BG)
+        pygame.draw.rect(
+            window,
+            COL_SCOREBOARD,
+            pygame.Rect(
+                (0, window_height - 5 * scale_factor, window_width, 5 * scale_factor)
+            ),
+        )
+        draw(
+            robot_pos,
+            walls,
+            boxes_l,
+        )
+        GAME_FONT.render_to(
+            window,
+            (40, window_height - 4 * scale_factor),
+            "GPS Score: " + str(score_boxes(boxes_l)),
+            COL_SCORE,
+        )
+
+        pygame.display.update()
+        count += 1
+        if count >= len(moves):
+            break
+
+print("Final Score:", score_boxes(boxes_l))
