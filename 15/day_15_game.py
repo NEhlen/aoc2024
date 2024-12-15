@@ -10,6 +10,7 @@ np.set_printoptions(linewidth=800)
 file = "15/input.txt"
 
 play = True
+save_imgs = False
 
 with open(file, "r") as f:
     plan, moves = f.read().strip().split("\n\n")
@@ -245,88 +246,109 @@ GAME_FONT.render_to(
     "GPS Score: " + str(score_boxes(boxes_l)),
     COL_SCORE,
 )
-
 pygame.display.update()
 pygame.image.save(window, "15/screenshot.png")
-while True:
-    if play:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                print("Quitting Game")
-                pygame.quit()
-                sys.exit()
+try:
+    while True:
+        if play:
+            for event in pygame.event.get():
+                if event.type == QUIT or (
+                    event.type == KEYDOWN and event.key == K_ESCAPE
+                ):
+                    print("Quitting Game")
+                    pygame.quit()
+                    sys.exit()
 
-            if event.type == KEYDOWN and event.key == K_d:
-                robot_pos, boxes_l, boxes_r = move_character(
-                    ">", robot_pos, boxes_l, boxes_r
-                )
-            if event.type == KEYDOWN and event.key == K_a:
-                robot_pos, boxes_l, boxes_r = move_character(
-                    "<", robot_pos, boxes_l, boxes_r
-                )
-            if event.type == KEYDOWN and event.key == K_s:
-                robot_pos, boxes_l, boxes_r = move_character(
-                    "v", robot_pos, boxes_l, boxes_r
-                )
-            if event.type == KEYDOWN and event.key == K_w:
-                robot_pos, boxes_l, boxes_r = move_character(
-                    "^", robot_pos, boxes_l, boxes_r
-                )
-        window.fill(COL_BG)
-        pygame.draw.rect(
-            window,
-            COL_SCOREBOARD,
-            pygame.Rect(
-                (0, window_height - 5 * scale_factor, window_width, 5 * scale_factor)
-            ),
-        )
-        draw(
-            robot_pos,
-            walls,
-            boxes_l,
-        )
-        GAME_FONT.render_to(
-            window,
-            (40, window_height - 4 * scale_factor),
-            "GPS Score: " + str(score_boxes(boxes_l)),
-            COL_SCORE,
-        )
+                if event.type == KEYDOWN and event.key == K_d:
+                    robot_pos, boxes_l, boxes_r = move_character(
+                        ">", robot_pos, boxes_l, boxes_r
+                    )
+                if event.type == KEYDOWN and event.key == K_a:
+                    robot_pos, boxes_l, boxes_r = move_character(
+                        "<", robot_pos, boxes_l, boxes_r
+                    )
+                if event.type == KEYDOWN and event.key == K_s:
+                    robot_pos, boxes_l, boxes_r = move_character(
+                        "v", robot_pos, boxes_l, boxes_r
+                    )
+                if event.type == KEYDOWN and event.key == K_w:
+                    robot_pos, boxes_l, boxes_r = move_character(
+                        "^", robot_pos, boxes_l, boxes_r
+                    )
+            window.fill(COL_BG)
+            pygame.draw.rect(
+                window,
+                COL_SCOREBOARD,
+                pygame.Rect(
+                    (
+                        0,
+                        window_height - 5 * scale_factor,
+                        window_width,
+                        5 * scale_factor,
+                    )
+                ),
+            )
+            draw(
+                robot_pos,
+                walls,
+                boxes_l,
+            )
+            GAME_FONT.render_to(
+                window,
+                (40, window_height - 4 * scale_factor),
+                "GPS Score: " + str(score_boxes(boxes_l)),
+                COL_SCORE,
+            )
 
-        pygame.display.update()
-    else:
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                print("Quitting Game")
-                pygame.quit()
-                sys.exit()
+            pygame.display.update()
 
-        robot_pos, boxes_l, boxes_r = move_character(
-            moves[count], robot_pos, boxes_l, boxes_r
-        )
+            if save_imgs:
+                pygame.image.save(window, f"15/frames/{count:05d}.png")
+            count += 1
+        else:
+            for event in pygame.event.get():
+                if event.type == QUIT or (
+                    event.type == KEYDOWN and event.key == K_ESCAPE
+                ):
+                    print("Quitting Game")
+                    pygame.quit()
+                    sys.exit()
 
-        window.fill(COL_BG)
-        pygame.draw.rect(
-            window,
-            COL_SCOREBOARD,
-            pygame.Rect(
-                (0, window_height - 5 * scale_factor, window_width, 5 * scale_factor)
-            ),
-        )
-        draw(
-            robot_pos,
-            walls,
-            boxes_l,
-        )
-        GAME_FONT.render_to(
-            window,
-            (40, window_height - 4 * scale_factor),
-            "GPS Score: " + str(score_boxes(boxes_l)),
-            COL_SCORE,
-        )
+            robot_pos, boxes_l, boxes_r = move_character(
+                moves[count], robot_pos, boxes_l, boxes_r
+            )
 
-        pygame.display.update()
-        count += 1
-        if count >= len(moves):
-            break
+            window.fill(COL_BG)
+            pygame.draw.rect(
+                window,
+                COL_SCOREBOARD,
+                pygame.Rect(
+                    (
+                        0,
+                        window_height - 5 * scale_factor,
+                        window_width,
+                        5 * scale_factor,
+                    )
+                ),
+            )
+            draw(
+                robot_pos,
+                walls,
+                boxes_l,
+            )
+            GAME_FONT.render_to(
+                window,
+                (40, window_height - 4 * scale_factor),
+                "GPS Score: " + str(score_boxes(boxes_l)),
+                COL_SCORE,
+            )
 
-print("Final Score:", score_boxes(boxes_l))
+            pygame.display.update()
+            if save_imgs:
+                pygame.image.save(window, f"15/frames/{count:05d}.png")
+            count += 1
+            if count >= len(moves):
+                break
+finally:
+    pygame.quit()
+    print("Final Score:", score_boxes(boxes_l))

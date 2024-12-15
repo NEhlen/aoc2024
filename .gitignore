@@ -162,3 +162,6 @@ cython_debug/
 #.idea/
 
 **/input.txt
+15/frames/*
+15/frames/** */
+!15/frames/.gitkeep
