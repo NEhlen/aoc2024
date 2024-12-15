@@ -99,7 +99,7 @@ def move_character(
 
 
 # window is necessary for pygame, but the game is played in terminal
-scale_factor = 10
+scale_factor = 15
 window_height = (plan.shape[0] + 5) * scale_factor
 window_width = plan.shape[1] * scale_factor
 
@@ -131,9 +131,49 @@ def load_colormap(cmap: str = "default"):
         COL_SCORE = COL_BG
         COL_SCOREBOARD = "#405010"
 
+    elif cmap == "hk":
+        COL_ROBOT = "#ff8acd"
+        COL_BOX = "#ffffff"
+        COL_WALL = "#ff8acd"
+        COL_WALL_HIGHLIGHT = COL_BOX
+        COL_BG = "#4aedff"
+        COL_SCORE = COL_BG
+        COL_SCOREBOARD = "#b03e80"
+
+    elif cmap == "ff":
+        col0 = "#302387"
+        col1 = "#ff3796"
+        col2 = "#00faac"
+        col3 = "#fffdaf"
+
+        COL_ROBOT = col0
+        COL_BOX = col1
+        COL_WALL = col0
+        COL_WALL_HIGHLIGHT = COL_BOX
+        COL_BG = col3
+        COL_BOX_FILL = col2
+        COL_SCORE = col3
+        COL_SCOREBOARD = COL_WALL
+
+    elif cmap == "gb2":
+        col0 = "#131018"
+        col1 = "#382843"
+        col2 = "#7c6d80"
+        col3 = "#c7c6c6"
+
+        COL_ROBOT = col0
+        COL_BOX = col1
+        COL_WALL = col0
+        COL_WALL_HIGHLIGHT = col2
+        COL_BG = col3
+        COL_BOX_FILL = col2
+        COL_SCORE = col3
+        COL_SCOREBOARD = COL_WALL
+
     return (
         COL_ROBOT,
         COL_BOX,
+        COL_BOX_FILL,
         COL_WALL,
         COL_WALL_HIGHLIGHT,
         COL_BG,
@@ -142,38 +182,31 @@ def load_colormap(cmap: str = "default"):
     )
 
 
-COL_ROBOT, COL_BOX, COL_WALL, COL_WALL_HIGHLIGHT, COL_BG, COL_SCORE, COL_SCOREBOARD = (
-    load_colormap("gb")
-)
+(
+    COL_ROBOT,
+    COL_BOX,
+    COL_BOX_FILL,
+    COL_WALL,
+    COL_WALL_HIGHLIGHT,
+    COL_BG,
+    COL_SCORE,
+    COL_SCOREBOARD,
+) = load_colormap("gb2")
 window = pygame.display.set_mode((window_width, window_height))
 window.fill(COL_BG)
 
 
 # Create a custom pattern
-pattern_size = 20
+pattern_size = scale_factor * 200
 pattern_surface = pygame.Surface((pattern_size, pattern_size))
 pattern_surface.fill(COL_WALL)  # Background color
-pygame.draw.line(
-    pattern_surface, COL_WALL_HIGHLIGHT, (0, 0), (pattern_size, pattern_size), 2
-)  # Diagonal line
-pygame.draw.line(
-    pattern_surface, COL_WALL_HIGHLIGHT, (0, 5), (pattern_size, pattern_size + 5), 2
-)  # Diagonal line
-pygame.draw.line(
-    pattern_surface, COL_WALL_HIGHLIGHT, (0, 10), (pattern_size, pattern_size + 10), 2
-)  # Diagonal line
-pygame.draw.line(
-    pattern_surface, COL_WALL_HIGHLIGHT, (0, 15), (pattern_size, pattern_size + 15), 2
-)  # Diagonal line
-pygame.draw.line(
-    pattern_surface, COL_WALL_HIGHLIGHT, (5, 0), (pattern_size + 5, pattern_size), 2
-)  # Diagonal line
-pygame.draw.line(
-    pattern_surface, COL_WALL_HIGHLIGHT, (10, 0), (pattern_size + 10, pattern_size), 2
-)  # Diagonal line
-pygame.draw.line(
-    pattern_surface, COL_WALL_HIGHLIGHT, (15, 0), (pattern_size + 15, pattern_size), 2
-)  # Diagonal line
+for i in range(0, pattern_size, 5):
+    pygame.draw.line(
+        pattern_surface, COL_WALL_HIGHLIGHT, (0, i), (pattern_size, pattern_size + i), 2
+    )  # Diagonal line
+    pygame.draw.line(
+        pattern_surface, COL_WALL_HIGHLIGHT, (i, 0), (pattern_size + i, pattern_size), 2
+    )  # Diagonal line
 
 # Pre-generate a large tiled pattern surface
 max_width, max_height = (
@@ -207,7 +240,15 @@ def draw(robot, walls, boxes):
             tiled_pattern,
         )
     for box in boxes:
-
+        pygame.draw.rect(
+            window,
+            COL_BOX_FILL,
+            pygame.Rect(
+                (box.real * scale_factor, box.imag * scale_factor),
+                (2 * scale_factor, 1 * scale_factor),
+            ),
+            border_radius=3,
+        )
         pygame.draw.rect(
             window,
             COL_BOX,
@@ -215,6 +256,8 @@ def draw(robot, walls, boxes):
                 (box.real * scale_factor, box.imag * scale_factor),
                 (2 * scale_factor, 1 * scale_factor),
             ),
+            width=2,
+            border_radius=3,
         )
     pygame.draw.circle(
         window,
