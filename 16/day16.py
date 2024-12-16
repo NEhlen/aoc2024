@@ -33,11 +33,6 @@ score_rotate = 1000
 
 # %%
 def compute_cost(facing: complex, dir_: complex):
-    # angle_num = np.round(
-    #     2
-    #     * np.arccos(np.dot([facing.real, facing.imag], [dir_.real, dir_.imag]))
-    #     / np.pi
-    # ).astype(int)
     angle_num = 0
     cosphi = np.dot([facing.real, facing.imag], [dir_.real, dir_.imag])
     if cosphi == 0:
@@ -90,7 +85,7 @@ while to_visit:
     for dir_ in check_dirs:
         nt = next_tile + dir_
         ns = next_score + compute_cost(next_dir, dir_)
-        if nt not in walls:
+        if nt not in walls and ns <= min_cost:
             if nt not in visited:
                 to_visit.append((nt, ns, dir_))
             elif ns < scores[nt]:
