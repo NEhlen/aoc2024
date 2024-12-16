@@ -103,7 +103,7 @@ print(min_cost)
 print("Shortest Path:", scores[ending_point])
 # %%
 ending_path_seats = set()
-ending_score = 10000000000000
+ending_score = scores[ending_point]
 cache = {}
 
 
@@ -120,7 +120,7 @@ def move(pos: complex, facing: complex, path: list[complex], score: int):
     for dir_ in check_dirs:
         nt = pos + dir_
         ns = score + compute_cost(facing, dir_)
-        if nt not in walls:
+        if (nt not in walls) and score <= min_cost:
             if nt not in path:
                 if (nt, dir_) in cache:
                     if ns <= cache[(nt, dir_)]:
