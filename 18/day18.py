@@ -139,6 +139,8 @@ fig, axarr = plt.subplots(2, 1, dpi=300, figsize=(20, 10), sharex=True, sharey=T
 axarr[0].scatter([p.real for p in path], [p.imag for p in path], s=5)
 axarr[0].scatter([p.real for p in bts], [p.imag for p in bts], s=5)
 axarr[0].set_aspect("equal")
+axarr[0].set_xlabel("X Coords [a.u.]")
+axarr[0].set_ylabel("Y Coords [a.u.]")
 axarr[0].set_title("Winning Path")
 axarr[0].invert_yaxis()
 axarr[1].imshow(plot_cost(cheapest_cost))
@@ -157,7 +159,7 @@ print("Minimum Steps A:", len(path) - 1)
 # just brute force, but only check when a new bit falls on the current best path
 for len_bts in range(1024, len(bts_all)):
     if bts_all[len_bts] not in path:
-        print(bts_all[len_bts])
+        # print(bts_all[len_bts])
         continue
     path_dict, cheapest_cost = run_astar(bts_all[: len_bts + 1])
     if not path_dict:
