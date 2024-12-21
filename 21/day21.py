@@ -1,6 +1,7 @@
 import numpy as np
 import re
 from functools import cache
+from itertools import product
 
 file = "21/input.txt"
 
@@ -147,12 +148,12 @@ def robot(moves: str, depth: int = 0, adder: int = 0):
 
 sum_complexities = 0
 
-for to_push in lines:
 
+def numpad2robot(numpad: str):
     cur_pos = "A"
     movements_numpad = []
     movement_counter = 1
-    for c in to_push:
+    for c in numpad:
         movement_counter *= 1
         diff = numpad_coords[c] - numpad_coords[cur_pos]
         movement = ""
@@ -191,62 +192,94 @@ for to_push in lines:
         movements_numpad.append(movement)
         cur_pos = c
 
-    print(to_push, len("".join(robot("".join(robot("".join(movements_numpad)))))))
+    return "".join(movements_numpad)
+
+
+for to_push in lines:
+    print(to_push, len("".join(robot("".join(robot(numpad2robot(to_push)))))))
     sum_complexities += len(
-        "".join(robot("".join(robot("".join(movements_numpad)))))
+        "".join(robot("".join(robot(numpad2robot(to_push)))))
     ) * int(re.sub(r"\D", "", to_push))
 
 print("Sum of complexities A:", sum_complexities)
 
-
-# should work if it didn't crash the kernel
-# need to revisit later
-@cache
-def robot_B(moves: str, depth: int = 0):
-
-    if depth == 25:
-        return moves
-    cur_pos = "A"
-    movements = []
-    for move in moves:
-        diff = arrow_coords[move] - arrow_coords[cur_pos]
-        movement = ""
-
-        if arrow_coords[move].real == 0 or arrow_coords[cur_pos].real == 0:
-            if diff.imag >= 0:
-                movement += "v" * int(diff.imag)
-
-            if diff.real <= 0:
-                movement += "<" * int(-diff.real)
-
-            if diff.real > 0:
-                movement += ">" * int(diff.real)
-
-            if diff.imag < 0:
-                movement += "^" * int(-diff.imag)
-
-        else:
-            if diff.real <= 0:
-                movement += "<" * int(-diff.real)
-
-            if diff.imag < 0:
-                movement += "^" * int(-diff.imag)
-
-            if diff.imag >= 0:
-                movement += "v" * int(diff.imag)
-
-            if diff.real > 0:
-                movement += ">" * int(diff.real)
-
-        movement += "A|"
-        # movements.append(robot_B(movement, depth + 1))
-
-        movements.append("".join([robot_B(m, depth + 1) for m in movement.split("|")]))
-
-        cur_pos = move
-    # if movements:
-    #     print(movements, depth)
-    return "".join(movements)
+# %%
+# idea:
+# make another connection matrix but from robot i to robot j
+# base: pairs of buttons (from, to)
+# to move button i from a to b the matrix row
+# (a,b) should have a 1 for the moves robot j needs to do
+# for the arrow keys, there are only 25 pairs of combinations
+# so we end up with a 25x25 matrix
 
 
-len("".join([robot_B(m) for m in movements_numpad]))
+def getPath(from_, to_):
+    diff = to_ - from_
+    movement = ""
+
+    if to_.real == 0 or from_.real == 0:
+        if diff.imag >= 0:
+            movement += "v" * int(diff.imag)
+
+        if diff.real <= 0:
+            movement += "<" * int(-diff.real)
+
+        if diff.real > 0:
+            movement += ">" * int(diff.real)
+
+        if diff.imag < 0:
+            movement += "^" * int(-diff.imag)
+
+    else:
+        if diff.real <= 0:
+            movement += "<" * int(-diff.real)
+
+        if diff.imag < 0:
+            movement += "^" * int(-diff.imag)
+
+        if diff.imag >= 0:
+            movement += "v" * int(diff.imag)
+
+        if diff.real > 0:
+            movement += ">" * int(diff.real)
+
+    return movement + "A"
+
+
+connection_matrix = np.zeros((25, 25), dtype=int)
+basis = [x + y for (x, y) in product("A^<v>", "A^<v>")]
+
+for i, pair in enumerate(basis):
+    a, b = pair[0], pair[1]
+    path = getPath(arrow_coords[a], arrow_coords[b])
+    for p1, p2 in zip("A" + path[:-1], path):
+        connection_matrix[i, basis.index(p1 + p2)] += 1
+
+
+# generate the deep connection matrix of robots at depth N
+# by repeated matrix multiplication
+def deepConnection(depth):
+    return np.linalg.matrix_power(connection_matrix, depth)
+
+
+total = 0
+for to_push in lines:
+    depth = 25
+
+    deep_connection_matrix = deepConnection(
+        depth
+    )  # connection from final robot to depth N
+    # sum of all move counts for each pair of (from, to) buttons on final input how
+    # many moves of robot at depth depth is needed
+    deep_connection_counts = deep_connection_matrix.sum(axis=1)
+
+    count = 0
+    to_push_rb = "A" + numpad2robot(to_push)
+    for i in range(0, len(to_push_rb) - 1):
+        a, b = to_push_rb[i], to_push_rb[i + 1]
+        count += deep_connection_counts[basis.index(a + b)]
+
+    total += count * int(re.sub(r"\D", "", to_push))
+    print(to_push, count)
+
+print("total B", total)
