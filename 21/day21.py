@@ -1,5 +1,6 @@
 import numpy as np
 import re
+from functools import cache
 
 file = "21/input.txt"
 
@@ -193,6 +194,59 @@ for to_push in lines:
     print(to_push, len("".join(robot("".join(robot("".join(movements_numpad)))))))
     sum_complexities += len(
         "".join(robot("".join(robot("".join(movements_numpad)))))
-    ) * int(re.sub("\D", "", to_push))
+    ) * int(re.sub(r"\D", "", to_push))
 
-print(sum_complexities)
+print("Sum of complexities A:", sum_complexities)
+
+
+# should work if it didn't crash the kernel
+# need to revisit later
+@cache
+def robot_B(moves: str, depth: int = 0):
+
+    if depth == 25:
+        return moves
+    cur_pos = "A"
+    movements = []
+    for move in moves:
+        diff = arrow_coords[move] - arrow_coords[cur_pos]
+        movement = ""
+
+        if arrow_coords[move].real == 0 or arrow_coords[cur_pos].real == 0:
+            if diff.imag >= 0:
+                movement += "v" * int(diff.imag)
+
+            if diff.real <= 0:
+                movement += "<" * int(-diff.real)
+
+            if diff.real > 0:
+                movement += ">" * int(diff.real)
+
+            if diff.imag < 0:
+                movement += "^" * int(-diff.imag)
+
+        else:
+            if diff.real <= 0:
+                movement += "<" * int(-diff.real)
+
+            if diff.imag < 0:
+                movement += "^" * int(-diff.imag)
+
+            if diff.imag >= 0:
+                movement += "v" * int(diff.imag)
+
+            if diff.real > 0:
+                movement += ">" * int(diff.real)
+
+        movement += "A|"
+        # movements.append(robot_B(movement, depth + 1))
+
+        movements.append("".join([robot_B(m, depth + 1) for m in movement.split("|")]))
+
+        cur_pos = move
+    # if movements:
+    #     print(movements, depth)
+    return "".join(movements)
+
+
+len("".join([robot_B(m) for m in movements_numpad]))
