@@ -67,19 +67,22 @@ for i, (c1, c2) in enumerate(zip(output_z_correct[::-1], (output_z_real)[::-1]))
 # z19 x19 AND y19 -> z19 needs XOR, swap with kbs
 # z24 swap hjm with mcq
 # z37 swap spj dsd
-# inspect visually the input after finding wrong bits
+# inspect visually the input after finding wrong bits and then swap
 temp = gates["djg"]
 gates["djg"] = gates["z12"]
 gates["z12"] = temp
 
-temp = gates["kbs"]
-gates["kbs"] = gates["z19"]
+temp = gates["sbg"]
+gates["sbg"] = gates["z19"]
 gates["z19"] = temp
 
 temp = gates["hjm"]
 gates["hjm"] = gates["mcq"]
 gates["mcq"] = temp
 
-temp = gates["spj"]
-gates["spj"] = gates["dsd"]
+temp = gates["z37"]
+gates["z37"] = gates["dsd"]
 gates["dsd"] = temp
+
+output = sorted(["djg", "z12", "sbg", "z19", "hjm", "mcq", "z37", "dsd"])
+print("Answer B", ",".join(output))
