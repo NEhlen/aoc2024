@@ -62,27 +62,24 @@ for i, (c1, c2) in enumerate(zip(output_z_correct[::-1], (output_z_real)[::-1]))
     if c1 != c2:
         print("incorrect bit:", i)
 
+# z12 jsb AND njf -> z12 it needs to be an XOR
+# swap z12 with djg
+# z19 x19 AND y19 -> z19 needs XOR, swap with kbs
+# z24 swap hjm with mcq
+# z37 swap spj dsd
+# inspect visually the input after finding wrong bits
+temp = gates["djg"]
+gates["djg"] = gates["z12"]
+gates["z12"] = temp
 
-def get_value(bit, swapped: dict = None):
-    if bit in starting_bits:
-        return starting_bits[bit]
-    else:
-        gate = gates[bit]
+temp = gates["kbs"]
+gates["kbs"] = gates["z19"]
+gates["z19"] = temp
 
-        if "AND" in gate:
-            a, b = gate.split(" AND ")
-            val_a = get_value(a)
-            val_b = get_value(b)
-            return val_a & val_b
-        elif "XOR" in gate:
-            a, b = gate.split(" XOR ")
-            val_a = get_value(a)
-            val_b = get_value(b)
-            return val_a ^ val_b
-        elif "OR" in gate:
-            a, b = gate.split(" OR ")
-            val_a = get_value(a)
-            val_b = get_value(b)
-            return val_a | val_b
-        else:
-            return get_value(gate)
+temp = gates["hjm"]
+gates["hjm"] = gates["mcq"]
+gates["mcq"] = temp
+
+temp = gates["spj"]
+gates["spj"] = gates["dsd"]
+gates["dsd"] = temp
